@@ -199,8 +199,8 @@ Backend:
 - LangChain
 - Pandas/NumPy
 - Matplotlib
-- OpenAI API (gpt-4o-mini-2024-07-18, text-embedding-3-small at 256 dimensions)
-- PostgreSQL with pgvector
+- OpenAI API (gpt-4o-mini-2024-07-18, text-embedding-3-small at 1536 dimensions)
+- PostgreSQL with pgvector using Replit's PostgreSQL database
 - SQLAlchemy
 ```
 
