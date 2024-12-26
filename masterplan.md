@@ -221,7 +221,7 @@ Backend:
 7. Integrate RAG system
 8. Testing and optimization
 
-## Next Steps test
+## Next Steps
 1. Set up Replit environment
 2. Create basic NextJS template
 3. Configure PostgreSQL and pgvector
