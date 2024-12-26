@@ -1,6 +1,6 @@
 {pkgs}: {
   deps = [
-    # Python
+    # Python base
     pkgs.python39
     pkgs.poetry
     
@@ -22,9 +22,13 @@
     # PDF processing
     pkgs.poppler_utils
     
-    # Additional system libraries
+    # System libraries
     pkgs.openssl
     pkgs.libpq
     pkgs.zlib
   ];
+  
+  env = {
+    LD_LIBRARY_PATH = "${pkgs.postgresql.lib}/lib";
+  };
 }

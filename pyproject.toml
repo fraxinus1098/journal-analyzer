@@ -3,10 +3,8 @@ name = "journal-analyzer"
 version = "0.1.0"
 description = "A web application for analyzing personal journal entries"
 authors = ["Ash Duong <anhdduong2012@gmail.com>"]
-
-[tool.poetry.packages]
 packages = [
-    { include = "journal_analyzer" },
+    { include = "journal_analyzer" }
 ]
 
 [tool.poetry.dependencies]
@@ -24,7 +22,7 @@ pypdf2 = "^3.0.1"
 python-multipart = "^0.0.6"
 sqlalchemy = "^2.0.23"
 psycopg2-binary = "^2.9.9"
-pgvector = "^0.2.3"
+pgvector = "0.7.0"  # don't install sqlalchemy-pgvector since that's already included in this one
 python-dotenv = "^1.0.0"
 pydantic = "^2.5.1"
 textstat = "^0.7.3"
