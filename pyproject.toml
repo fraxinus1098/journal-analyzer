@@ -1,8 +1,13 @@
 [tool.poetry]
-name = "mental-health-journal-analysis"
+name = "journal-analyzer"
 version = "0.1.0"
 description = "A web application for analyzing personal journal entries"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Ash Duong <anhdduong2012@gmail.com>"]
+
+[tool.poetry.packages]
+packages = [
+    { include = "journal_analyzer" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
