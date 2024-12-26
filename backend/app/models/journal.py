@@ -6,18 +6,23 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
 from sqlalchemy.dialogs import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
+from pydantic import BaseModel, Field
+from typing import Optional, List
 
 Base = declarative_base()
 
-class JournalEntry(Base):
-    __tablename__ = "journal_entries"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    content = Column(String)
-    embedding = Column(ARRAY(Float, dimensions=256))  # OpenAI embeddings
-    created_at = Column(DateTime, default=datetime.utcnow)
-    # TODO: Add additional fields
+class JournalEntry(BaseModel):
+    """Model for a journal entry"""
+    date: datetime
+    content: str
+    word_count: int = Field(default=0)
+    year: int = Field(...)
+    month: int = Field(...)
+    day: int = Field(...)
+    metadata: dict = Field(default_factory=dict)
+    
+    class Config:
+        from_attributes = True
 
 class AnalysisResult(Base):
     __tablename__ = "analysis_results"
