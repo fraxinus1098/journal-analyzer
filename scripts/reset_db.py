@@ -1,7 +1,7 @@
-from app.db.init_db import engine, init_db
+from app.db.init_db import engine, init_db, SessionLocal
 from app.utils.vector_utils import create_vector_similarity_index
-from app.db.init_db import SessionLocal
 from sqlalchemy import text
+from app.models.journal import Base
 
 def reset_database():
     # Drop all tables
@@ -11,7 +11,6 @@ def reset_database():
         conn.commit()
     
     # Drop and recreate all tables
-    from database.models import Base
     Base.metadata.drop_all(bind=engine)
     
     # Reinitialize everything

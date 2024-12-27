@@ -4,7 +4,7 @@ Service for OpenAI API interactions.
 """
 from typing import List, Dict, Any
 from openai import OpenAI
-from app.core.config import settings
+from ..core.config import settings
 
 class OpenAIService:
     def __init__(self):

@@ -4,7 +4,7 @@ Service for tracking personal growth and goals through journal entries.
 """
 from typing import List, Dict, Any
 from datetime import datetime
-from app.services.journal_service import JournalService
+from .journal_service import JournalService
 
 class GrowthService:
     def __init__(self):

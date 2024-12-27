@@ -4,8 +4,8 @@ Service for comparative analysis of journal entries across time periods.
 """
 from typing import List, Dict, Any
 import pandas as pd
-from app.db.crud import get_journal_entries
-from app.services.analysis_service import AnalysisService
+from ..db.crud import get_journal_entries
+from .analysis_service import AnalysisService
 
 class ComparativeService:
     def __init__(self):

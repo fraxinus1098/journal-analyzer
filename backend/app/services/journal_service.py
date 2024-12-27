@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 from langchain.retrievers import BM25Retriever, EnsembleRetriever
 from app.models.journal import JournalEntry
 from app.services.openai_service import OpenAIService
-from app.db.postgres import get_db_session
+from ..db.init_db import get_db
 
 class JournalService:
     def __init__(self):

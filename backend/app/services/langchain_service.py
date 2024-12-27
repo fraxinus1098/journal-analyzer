@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
-from app.core.config import settings
+from ..core.config import settings
 
 class LangChainService:
     def __init__(self):

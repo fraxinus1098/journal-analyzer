@@ -3,11 +3,11 @@
 CRUD operations for database models.
 """
 from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from app.models.journal import JournalEntry, AnalysisResult
 
-async def create_journal_entry(
-    db: AsyncSession,
+def create_journal_entry(
+    db: Session,
     user_id: int,
     content: str,
     embedding: List[float]
@@ -16,8 +16,8 @@ async def create_journal_entry(
     # TODO: Implement journal entry creation
     pass
 
-async def get_journal_entries(
-    db: AsyncSession,
+def get_journal_entries(
+    db: Session,
     user_id: int,
     skip: int = 0,
     limit: int = 100

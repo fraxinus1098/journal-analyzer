@@ -11,8 +11,8 @@ from ...core.config import settings
 from ...utils.security import validate_file_type
 import requests
 from sqlalchemy.orm import Session
-from ...database.database import get_db
-from ...models.journal_entry import JournalEntry
+from ...db.init_db import get_db
+from ...models.journal import JournalEntry
 
 router = APIRouter()
 pdf_service = PDFService()
@@ -119,21 +119,19 @@ def get_upload_status(task_id: str) -> JSONResponse:
 
 def upload_pdfs(pdf_files):
     url = "http://localhost:8000/api/upload/"
-    files = [
-        ('files', (f.name, open(f, 'rb'), 'application/pdf'))
-        for f in pdf_files
-    ]
-    response = requests.post(url, files=files)
-    return response.json()
-
-# Example usage:
-pdfs = [
-    "path/to/2019.pdf",
-    "path/to/2020.pdf",
-    # ... add more files as needed
-]
-result = upload_pdfs(pdfs)
-print(result) 
+    files = []
+    try:
+        for f in pdf_files:
+            path = Path(f)
+            with open(path, 'rb') as file:
+                files.append(('files', (path.name, file, 'application/pdf')))
+        response = requests.post(url, files=files)
+        return response.json()
+    finally:
+        # Ensure all files are closed
+        for _, (_, file, _) in files:
+            if hasattr(file, 'close'):
+                file.close()
 
 @router.post("/upload")
 def upload_journal(file: UploadFile, db: Session = Depends(get_db)):

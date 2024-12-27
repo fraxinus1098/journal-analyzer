@@ -3,9 +3,9 @@
 Service for managing hybrid search combining BM25 and vector search.
 """
 from typing import List, Dict, Any
-from app.services.retrieval_service import RetrievalService
-from app.utils.vector_utils import VectorUtils
-from app.utils.ranking import RankingUtils
+from .retrieval_service import RetrievalService
+from ..utils.vector_utils import VectorUtils
+from ..utils.ranking import RankingUtils
 
 class HybridSearchService:
     def __init__(self):
