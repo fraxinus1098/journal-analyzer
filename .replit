@@ -1,5 +1,5 @@
 run = "python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8080"
-modules = ["python-3.9:v18-20230807-322e88b"]
+modules = ["python-3.9:v18-20230807-322e88b", "postgresql-16"]
 
 [nix]
 channel = "stable-23_05"
