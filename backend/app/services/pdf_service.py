@@ -1,17 +1,16 @@
 from pathlib import Path
 import pdfplumber
-import asyncio
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import re
 from ..models.journal import JournalEntry
-from ..db.session import get_db
+from ..db.init_db import get_db
 from ..utils.text_cleaner import clean_text
 import logging
 from ..services.entry_parser import EntryParser
 from ..services.validation_service import ValidationService
 from ..services.storage_service import StorageService
-from ..config import settings
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 
