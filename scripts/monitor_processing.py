@@ -2,7 +2,7 @@ import requests
 import time
 from typing import List, Dict
 
-def monitor_uploads(task_ids: List[str], base_url: str = "https://your-repl-name.your-username.repl.co"):
+def monitor_uploads(task_ids: List[str], base_url: str = "http://localhost:8000"):
     """Monitor the processing of uploaded files"""
     completed = set()
     

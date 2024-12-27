@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from backend.app.db.init_db import init_db
-from backend.app.api.endpoints import upload
+from .db.init_db import init_db
+from .api.endpoints import upload
 
 app = FastAPI()
 

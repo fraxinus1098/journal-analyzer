@@ -5,8 +5,8 @@ Database initialization and connection management.
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
-from backend.app.core.config import settings
-from backend.app.models.journal import Base
+from ..core.config import settings
+from ..models.journal import Base
 
 # Create async engine
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
