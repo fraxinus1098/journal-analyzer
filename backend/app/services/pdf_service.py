@@ -19,7 +19,7 @@ class PDFService:
     def __init__(self):
         self._tasks: Dict[str, Dict[str, Any]] = {}
         
-    async def process_pdf(self, file_path: Path, original_filename: str) -> str:
+    def process_pdf(self, file_path: Path, original_filename: str) -> str:
         """Process a PDF file and extract journal entries"""
         task_id = f"task_{original_filename}_{datetime.now().timestamp()}"
         self._tasks[task_id] = {"status": "processing", "progress": 0}
@@ -52,7 +52,7 @@ class PDFService:
             
             # Add validation step
             validator = ValidationService()
-            validated_entries = await validator.validate_entries(entries)
+            validated_entries = self._clean_and_validate_entries(entries)
             
             # Update progress and store validation results
             self._tasks[task_id].update({
@@ -62,7 +62,7 @@ class PDFService:
             })
             
             # Store only validated entries
-            await self._store_entries(validated_entries)
+            self._store_entries(validated_entries)
             
             self._tasks[task_id].update({
                 "status": "completed",
@@ -83,7 +83,7 @@ class PDFService:
             
         return task_id
     
-    async def _process_page_text(
+    def _process_page_text(
         self, 
         text: str, 
         current_entry: Optional[Dict[str, Any]] = None
@@ -115,7 +115,7 @@ class PDFService:
                 
         return entries
     
-    async def _clean_and_validate_entries(
+    def _clean_and_validate_entries(
         self, 
         entries: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
@@ -152,15 +152,15 @@ class PDFService:
             
         return True
     
-    async def _store_entries(self, entries: List[JournalEntry]) -> Dict[str, Any]:
+    def _store_entries(self, entries: List[JournalEntry]) -> Dict[str, Any]:
         """Store validated entries"""
         try:
             storage = StorageService(settings.DATABASE_URL)
-            result = await storage.store_entries(entries)
+            result = storage.store_entries(entries)
             
             # Optimize storage if needed
             if result["stored_entries"] > 1000:  # threshold for optimization
-                await storage.optimize_storage()
+                storage.optimize_storage()
             
             return result
             

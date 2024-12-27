@@ -10,12 +10,12 @@ class GrowthService:
     def __init__(self):
         self.journal_service = JournalService()
 
-    async def track_goals(self, user_id: int, timeframe: str) -> List[Dict[str, Any]]:
+    def track_goals(self, user_id: int, timeframe: str) -> List[Dict[str, Any]]:
         """Track goals mentioned in journal entries."""
         # TODO: Implement goal tracking
         pass
 
-    async def analyze_challenges(self, user_id: int) -> Dict[str, Any]:
+    def analyze_challenges(self, user_id: int) -> Dict[str, Any]:
         """Analyze patterns in challenges mentioned in journal entries."""
         # TODO: Implement challenge pattern analysis
         pass

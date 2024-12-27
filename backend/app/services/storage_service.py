@@ -55,7 +55,7 @@ class StorageService:
                 
                 conn.commit()
     
-    async def store_entries(self, entries: List[JournalEntry]) -> Dict[str, Any]:
+    def store_entries(self, entries: List[JournalEntry]) -> Dict[str, Any]:
         """Store journal entries and their vector embeddings"""
         try:
             with psycopg2.connect(self.db_url) as conn:
@@ -112,7 +112,7 @@ class StorageService:
             logger.error(f"Error storing entries: {str(e)}", exc_info=True)
             raise
     
-    async def get_storage_metrics(self) -> StorageMetrics:
+    def get_storage_metrics(self) -> StorageMetrics:
         """Get storage metrics"""
         with psycopg2.connect(self.db_url) as conn:
             with conn.cursor() as cur:
@@ -136,7 +136,7 @@ class StorageService:
                     index_size=result[1]
                 )
     
-    async def optimize_storage(self):
+    def optimize_storage(self):
         """Optimize database storage"""
         with psycopg2.connect(self.db_url) as conn:
             with conn.cursor() as cur:

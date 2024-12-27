@@ -13,7 +13,7 @@ class HybridSearchService:
         self.vector_utils = VectorUtils()
         self.ranking_utils = RankingUtils()
         
-    async def search(
+    def search(
         self,
         query: str,
         k: int = 5,
@@ -22,29 +22,18 @@ class HybridSearchService:
     ) -> List[Dict[str, Any]]:
         """Perform hybrid search combining BM25 and vector search."""
         # TODO: Implement hybrid search
-        # - Get BM25 results
-        # - Get vector search results
-        # - Combine and rank results
-        # - Return formatted results
         pass
 
-    async def add_document(self, document: str):
+    def add_document(self, document: str):
         """Add a new document to both search indexes."""
         # TODO: Implement document addition
-        # - Process document
-        # - Add to BM25 index
-        # - Add to vector index
-        # - Update cache
         pass
 
-    async def optimize_weights(
+    def optimize_weights(
         self,
         queries: List[str],
         relevant_docs: List[List[str]]
     ) -> Dict[str, float]:
         """Optimize weights for hybrid search combination."""
         # TODO: Implement weight optimization
-        # - Evaluate performance
-        # - Adjust weights
-        # - Validate results
         pass

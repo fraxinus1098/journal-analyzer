@@ -2,31 +2,28 @@
 """
 Database initialization and connection management.
 """
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
 from ..core.config import settings
 from ..models.journal import Base
 
-# Create async engine
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
+# Create synchronous engine instead of async
+engine = create_engine(settings.DATABASE_URL, echo=True)
 
-# Create async session factory
-AsyncSessionLocal = sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
+# Create synchronous session factory
+SessionLocal = sessionmaker(bind=engine)
 
-async def init_db():
+def init_db():
     """Initialize database with required tables."""
-    async with engine.begin() as conn:
+    with engine.begin() as conn:
         # Create pgvector extension
-        await conn.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
+        conn.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
         # Create tables
-        await conn.run_sync(Base.metadata.create_all)
+        Base.metadata.create_all(bind=engine)
 
-async def get_db():
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

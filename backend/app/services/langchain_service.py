@@ -19,7 +19,7 @@ class LangChainService:
             chunk_overlap=200
         )
 
-    async def process_document(self, text: str) -> List[Document]:
+    def process_document(self, text: str) -> List[Document]:
         """Process text into LangChain documents."""
         # TODO: Implement document processing
         # - Split text into chunks
@@ -27,7 +27,7 @@ class LangChainService:
         # - Add metadata
         pass
 
-    async def generate_embeddings(self, documents: List[Document]) -> List[List[float]]:
+    def generate_embeddings(self, documents: List[Document]) -> List[List[float]]:
         """Generate embeddings for documents."""
         # TODO: Implement embedding generation
         # - Batch process documents
@@ -35,7 +35,7 @@ class LangChainService:
         # - Handle rate limiting
         pass
 
-    async def setup_retrieval_pipeline(self) -> Any:
+    def setup_retrieval_pipeline(self) -> Any:
         """Set up the LangChain retrieval pipeline."""
         # TODO: Implement retrieval pipeline
         # - Configure retrievers

@@ -14,17 +14,17 @@ class JournalService:
         # TODO: Initialize retrievers
         self.ensemble_retriever = None
         
-    async def process_journal_entry(self, entry: JournalEntry) -> Dict[str, Any]:
+    def process_journal_entry(self, entry: JournalEntry) -> Dict[str, Any]:
         """Process a new journal entry."""
         # TODO: Implement journal processing pipeline
         pass
 
-    async def analyze_emotions(self, entry_id: int) -> Dict[str, Any]:
+    def analyze_emotions(self, entry_id: int) -> Dict[str, Any]:
         """Analyze emotions in a journal entry."""
         # TODO: Implement emotional analysis
         pass
 
-    async def extract_topics(self, entry_id: int) -> List[str]:
+    def extract_topics(self, entry_id: int) -> List[str]:
         """Extract topics from a journal entry."""
         # TODO: Implement topic extraction
         pass

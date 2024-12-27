@@ -3,8 +3,9 @@
 SQLAlchemy models for journal entries and analysis results.
 """
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Text, JSON
+from sqlalchemy import Column, Integer, String, DateTime, Text, JSON, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 from pydantic import BaseModel, Field
 from typing import Optional, List

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
 from typing import List, Dict, Any
 import os
@@ -10,6 +10,9 @@ from ...services.pdf_service import PDFService
 from ...core.config import settings
 from ...utils.security import validate_file_type
 import requests
+from sqlalchemy.orm import Session
+from ...database.database import get_db
+from ...models.journal_entry import JournalEntry
 
 router = APIRouter()
 pdf_service = PDFService()
@@ -28,19 +31,12 @@ def sanitize_filename(filename: str) -> str:
     return filename
 
 @router.post("/upload/")
-async def upload_files(
+def upload_files(
     background_tasks: BackgroundTasks,
     files: List[UploadFile] = File(...)
 ) -> JSONResponse:
     """
     Upload and process PDF journal files
-    
-    Args:
-        background_tasks: FastAPI BackgroundTasks instance
-        files: List of files to upload
-        
-    Returns:
-        JSONResponse with upload results
     """
     results = []
     temp_files = []  # Track temp files for cleanup
@@ -62,18 +58,15 @@ async def upload_files(
             temp_files.append(temp_file)
             
             # Save and validate file size
-            try:
-                with temp_file.open("wb") as buffer:
-                    while chunk := await file.read(chunk_size):
-                        file_size += len(chunk)
-                        if file_size > MAX_FILE_SIZE:
-                            raise HTTPException(
-                                status_code=400, 
-                                detail=f"File size exceeds {MAX_FILE_SIZE // 1024 // 1024}MB limit"
-                            )
-                        buffer.write(chunk)
-            except OSError as e:
-                raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+            with temp_file.open("wb") as buffer:
+                while content := file.file.read(chunk_size):  # Changed from await
+                    file_size += len(content)
+                    if file_size > MAX_FILE_SIZE:
+                        raise HTTPException(
+                            status_code=400, 
+                            detail=f"File size exceeds {MAX_FILE_SIZE // 1024 // 1024}MB limit"
+                        )
+                    buffer.write(content)
             
             # Add to background processing queue
             background_tasks.add_task(
@@ -89,11 +82,9 @@ async def upload_files(
             })
             
         except HTTPException as e:
-            # Re-raise HTTP exceptions
             raise e
         except Exception as e:
             logger.error(f"Error processing file {getattr(file, 'filename', 'unknown')}: {str(e)}")
-            # Clean up temp file if it exists
             if temp_file and temp_file.exists():
                 temp_file.unlink()
                 
@@ -104,20 +95,15 @@ async def upload_files(
             })
             
         finally:
-            await file.close()
+            file.file.close()  # Changed from await
     
     # Add cleanup task for successful uploads
     background_tasks.add_task(cleanup_temp_files, temp_files)
             
     return JSONResponse(content={"results": results})
 
-async def cleanup_temp_files(temp_files: List[Path]) -> None:
-    """
-    Clean up temporary files after processing
-    
-    Args:
-        temp_files: List of temporary file paths to clean up
-    """
+def cleanup_temp_files(temp_files: List[Path]) -> None:
+    """Clean up temporary files after processing"""
     for temp_file in temp_files:
         try:
             if temp_file.exists():
@@ -126,18 +112,10 @@ async def cleanup_temp_files(temp_files: List[Path]) -> None:
             logger.error(f"Error cleaning up {temp_file}: {e}")
 
 @router.get("/upload/status/{task_id}")
-async def get_upload_status(task_id: str) -> JSONResponse:
-    """
-    Get the status of a file upload/processing task
-    
-    Args:
-        task_id: ID of the upload task to check
-        
-    Returns:
-        JSONResponse with task status
-    """
+def get_upload_status(task_id: str) -> JSONResponse:
+    """Get the status of a file upload/processing task"""
     status = pdf_service.get_task_status(task_id)
-    return JSONResponse(content=status) 
+    return JSONResponse(content=status)
 
 def upload_pdfs(pdf_files):
     url = "http://localhost:8000/api/upload/"
@@ -156,3 +134,11 @@ pdfs = [
 ]
 result = upload_pdfs(pdfs)
 print(result) 
+
+@router.post("/upload")
+def upload_journal(file: UploadFile, db: Session = Depends(get_db)):
+    """Upload a journal entry"""
+    journal_entry = JournalEntry(content="some content")
+    db.add(journal_entry)
+    db.commit()
+    return {"status": "success"} 

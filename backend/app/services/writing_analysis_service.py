@@ -10,12 +10,12 @@ class WritingAnalysisService:
     def __init__(self):
         self.openai_service = OpenAIService()
 
-    async def analyze_complexity(self, text: str) -> Dict[str, Any]:
+    def analyze_complexity(self, text: str) -> Dict[str, Any]:
         """Analyze writing complexity using various metrics."""
         # TODO: Implement complexity analysis
         pass
 
-    async def track_vocabulary(self, user_id: int, period: str) -> Dict[str, Any]:
+    def track_vocabulary(self, user_id: int, period: str) -> Dict[str, Any]:
         """Track vocabulary growth over time."""
         # TODO: Implement vocabulary tracking
         pass

@@ -11,7 +11,7 @@ class RetrievalService:
         self.langchain_service = LangChainService()
         self.bm25_retriever = None
         
-    async def initialize_bm25(self, documents: List[str]):
+    def initialize_bm25(self, documents: List[str]):
         """Initialize BM25 retriever with documents."""
         # TODO: Implement BM25 initialization
         # - Process documents
@@ -19,7 +19,7 @@ class RetrievalService:
         # - Configure retriever
         pass
 
-    async def search_documents(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    def search_documents(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
         """Search documents using BM25."""
         # TODO: Implement document search
         # - Process query
@@ -27,7 +27,7 @@ class RetrievalService:
         # - Format results
         pass
 
-    async def update_index(self, new_documents: List[str]):
+    def update_index(self, new_documents: List[str]):
         """Update the BM25 index with new documents."""
         # TODO: Implement index update
         # - Process new documents

@@ -11,7 +11,7 @@ class ValidationService:
     def __init__(self):
         self.validation_errors: List[Dict[str, Any]] = []
     
-    async def validate_entries(self, entries: List[JournalEntry]) -> List[JournalEntry]:
+    def validate_entries(self, entries: List[JournalEntry]) -> List[JournalEntry]:
         """Validate a list of journal entries"""
         validated_entries = []
         
