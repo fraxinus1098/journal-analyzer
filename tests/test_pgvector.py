@@ -1,6 +1,6 @@
 import numpy as np
-from database.init_db import get_db
-from database.models import JournalEntry
+from app.db.init_db import get_db
+from app.models.journal import JournalEntry
 
 def test_pgvector_insert():
     db = next(get_db())

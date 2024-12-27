@@ -1,5 +1,12 @@
 from fastapi import FastAPI
-from .api.endpoints import upload
+from backend.app.db.init_db import init_db
+from backend.app.api.endpoints import upload
 
 app = FastAPI()
-app.include_router(upload.router, prefix="/api") 
+
+@app.on_event("startup")
+async def startup_event():
+    await init_db()
+
+# Include your routers here
+app.include_router(upload.router) 

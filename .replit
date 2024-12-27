@@ -1,14 +1,9 @@
-run = "npm run dev & poetry run uvicorn main:app --host 0.0.0.0 --port 8000 & wait"
-entrypoint = "main.py"
-modules = ["postgresql-16", "python-3.9"]
-
-[env]
-PYTHON_VERSION = "3.9"
-POETRY_VIRTUALENVS_IN_PROJECT = "true"
+run = "PYTHONPATH=$PYTHONPATH:. python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8080"
+modules = ["python-3.9:v18-20230807-322e88b"]
 
 [nix]
-channel = "stable-23_11"
+channel = "stable-23_05"
 
 [deployment]
-run = ["sh", "-c", "npm run start"]
+run = ["sh", "-c", "PYTHONPATH=$PYTHONPATH:. uvicorn backend.app.main:app --host 0.0.0.0 --port 8080"]
 deploymentTarget = "cloudrun"

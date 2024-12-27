@@ -1,6 +1,6 @@
-from database.init_db import init_db, engine, get_db
-from database.models import JournalEntry
-from database.vector_ops import create_vector_similarity_index
+from app.db.init_db import init_db, engine, get_db
+from app.models.journal import JournalEntry
+from app.utils.vector_utils import create_vector_similarity_index
 import numpy as np
 from sqlalchemy import text
 

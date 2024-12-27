@@ -1,5 +1,17 @@
 {pkgs}: {
   deps = [
+    pkgs.tk
+    pkgs.tcl
+    pkgs.qhull
+    pkgs.gtk3
+    pkgs.gobject-introspection
+    pkgs.ghostscript
+    pkgs.freetype
+    pkgs.ffmpeg-full
+    pkgs.cairo
+    pkgs.bash
+    pkgs.libxcrypt
+    pkgs.glibcLocales
     # Python base
     pkgs.python39
     pkgs.poetry
@@ -24,7 +36,6 @@
     
     # System libraries
     pkgs.openssl
-    pkgs.libpq
     pkgs.zlib
   ];
   

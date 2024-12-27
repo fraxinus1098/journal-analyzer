@@ -1,6 +1,6 @@
-from database.init_db import init_db
-from database.vector_ops import create_vector_similarity_index
-from database.init_db import SessionLocal
+from app.db.init_db import init_db
+from app.utils.vector_utils import create_vector_similarity_index
+from app.db.init_db import SessionLocal
 from sqlalchemy import text
 
 def main():
