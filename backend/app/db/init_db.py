@@ -46,3 +46,28 @@ def test_db_connection():
 # Add this to your startup
 if __name__ == "__main__":
     test_db_connection()
+
+def verify_database():
+    """Verify database connection and tables."""
+    try:
+        # Test connection
+        with engine.connect() as conn:
+            # Check if tables exist
+            result = conn.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public'
+            """))
+            tables = [row[0] for row in result]
+            print(f"Found tables: {tables}")
+            
+            # Check journal_entries count
+            if 'journal_entries' in tables:
+                result = conn.execute(text("SELECT COUNT(*) FROM journal_entries"))
+                count = result.scalar()
+                print(f"Found {count} journal entries")
+                
+        return True
+    except Exception as e:
+        print(f"Database verification failed: {e}")
+        return False
