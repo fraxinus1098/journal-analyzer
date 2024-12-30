@@ -17,7 +17,7 @@ A web application deployed on Replit that analyzes personal journal entries to p
 
 ### Backend: Python + FastAPI
 - **Decision**: Python backend with FastAPI deployed on Replit
-- **Rationale**: FastAPI offers high performance, automatic API documentation, and seamless integration with async Python
+- **Rationale**: FastAPI offers high performance and automatic API documentation
 
 ### Data Storage & Retrieval: Hybrid Search System
 - **Decision**: Implement hybrid search combining BM25 and vector search
@@ -49,7 +49,7 @@ A web application deployed on Replit that analyzes personal journal entries to p
 
 ## Data Flow
 1. **Input Processing**
-   - PDF text extraction(PDFPlumber)
+   - PDF text extraction (PDFPlumber)
    - Date parsing and entry segmentation
    - Text cleaning and normalization
 

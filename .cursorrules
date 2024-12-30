@@ -16,6 +16,8 @@ Backend:
 - PostgreSQL with pgvector
 - Data processing (Pandas, NumPy)
 - OpenAI API integration
+- PDFPlumber for PDF parsing
+- SQLAlchemy with Psycopg2 for database interactions
 
 ## Development Principles
 
