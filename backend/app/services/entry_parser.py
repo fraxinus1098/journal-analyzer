@@ -1,108 +1,112 @@
-from datetime import datetime
+"""
+Service for parsing and segmenting journal entries.
+"""
 import re
-from typing import List, Dict, Any, Optional
-from ..models.journal import JournalEntry
+from datetime import datetime
+from typing import List, Dict, Any
 import logging
+from ..models.journal import JournalEntrySchema
 
 logger = logging.getLogger(__name__)
 
 class EntryParser:
+    # Common date patterns in journal entries
+    DATE_PATTERNS = [
+        r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b',  # MM/DD/YYYY or MM-DD-YYYY
+        r'\b(\d{4}[-/]\d{1,2}[-/]\d{1,2})\b',     # YYYY/MM/DD or YYYY-MM-DD
+        r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b',  # Month DD, YYYY
+    ]
+    
     def __init__(self):
-        self.date_pattern = r"(\d{2}/\d{2}/\d{4})(.*?)(?=\d{2}/\d{2}/\d{4}|$)"
-        self.date_format = "%m/%d/%Y"
+        self.compiled_patterns = [re.compile(pattern, re.IGNORECASE) for pattern in self.DATE_PATTERNS]
     
-    def parse_entries(self, text: str) -> List[JournalEntry]:
-        """Parse journal entries from text content"""
+    def parse_entries(self, content: List[Dict[str, Any]]) -> List[JournalEntrySchema]:
+        """
+        Parse PDF content into individual journal entries.
+        """
         entries = []
-        matches = re.finditer(self.date_pattern, text, re.DOTALL)
+        current_entry = ""
+        current_date = None
         
-        current_year = None
-        for match in matches:
-            try:
-                date_str, content = match.groups()
-                entry = self._create_entry(date_str.strip(), content.strip())
+        for page in content:
+            text = page['text']
+            
+            # Split text into potential entries
+            segments = self._split_by_dates(text)
+            
+            for date_str, entry_text in segments:
+                try:
+                    entry_date = self._parse_date(date_str)
+                    if entry_date and entry_text.strip():
+                        entry = self._create_entry(entry_date, entry_text.strip())
+                        entries.append(entry)
+                except Exception as e:
+                    logger.warning(f"Failed to parse entry with date {date_str}: {str(e)}")
+                    continue
+        
+        return sorted(entries, key=lambda x: x.date)
+    
+    def _split_by_dates(self, text: str) -> List[tuple[str, str]]:
+        """
+        Split text into segments based on date patterns.
+        Returns list of (date_string, content) tuples.
+        """
+        segments = []
+        last_end = 0
+        current_date = None
+        
+        # Combine all patterns into one search
+        for pattern in self.compiled_patterns:
+            for match in pattern.finditer(text):
+                date_str = match.group(0)
+                start_pos = match.start()
                 
-                if entry:
-                    # Validate year continuity
-                    if current_year and entry.year < current_year:
-                        logger.warning(f"Year discontinuity detected: {entry.year} after {current_year}")
-                    current_year = entry.year
-                    entries.append(entry)
-                    
-            except Exception as e:
-                logger.error(f"Error parsing entry: {str(e)}", exc_info=True)
+                # If we have a previous date, save the content
+                if current_date:
+                    content = text[last_end:start_pos].strip()
+                    segments.append((current_date, content))
+                
+                current_date = date_str
+                last_end = match.end()
+        
+        # Add the final segment
+        if current_date:
+            segments.append((current_date, text[last_end:].strip()))
+            
+        return segments
+    
+    def _parse_date(self, date_str: str) -> datetime:
+        """
+        Parse a date string into a datetime object.
+        Handles multiple date formats.
+        """
+        formats = [
+            "%m/%d/%Y", "%Y/%m/%d",
+            "%m-%d-%Y", "%Y-%m-%d",
+            "%B %d, %Y", "%B %d %Y"
+        ]
+        
+        for fmt in formats:
+            try:
+                return datetime.strptime(date_str, fmt)
+            except ValueError:
                 continue
         
-        return self._validate_and_sort_entries(entries)
+        raise ValueError(f"Unable to parse date: {date_str}")
     
-    def _create_entry(self, date_str: str, content: str) -> Optional[JournalEntry]:
-        """Create a journal entry from parsed components"""
-        try:
-            # Parse date
-            date = datetime.strptime(date_str, self.date_format)
-            
-            # Validate date range (2019-2024)
-            if not (2019 <= date.year <= 2024):
-                logger.warning(f"Entry date {date_str} outside valid range")
-                return None
-            
-            # Clean and validate content
-            if not self._validate_content(content):
-                return None
-            
-            # Create entry
-            return JournalEntry(
-                date=date,
-                content=content,
-                word_count=len(content.split()),
-                year=date.year,
-                month=date.month,
-                day=date.day,
-                metadata={
-                    "original_date_str": date_str,
-                    "parsed_timestamp": datetime.now().isoformat()
-                }
-            )
-            
-        except ValueError as e:
-            logger.error(f"Invalid date format: {date_str}", exc_info=True)
-            return None
-    
-    def _validate_content(self, content: str) -> bool:
-        """Validate entry content"""
-        # Remove whitespace
-        content = content.strip()
-        
-        # Check minimum length (10 characters)
-        if len(content) < 10:
-            return False
-        
-        # Check for obvious errors (e.g., all whitespace)
-        if not content.strip():
-            return False
-        
-        # Check for reasonable length (max 50K characters)
-        if len(content) > 50000:
-            logger.warning(f"Entry content exceeds 50K characters: {len(content)}")
-        
-        return True
-    
-    def _validate_and_sort_entries(self, entries: List[JournalEntry]) -> List[JournalEntry]:
-        """Validate and sort the complete list of entries"""
-        # Sort entries by date
-        entries.sort(key=lambda x: x.date)
-        
-        # Check for duplicate dates
-        dates_seen = set()
-        unique_entries = []
-        
-        for entry in entries:
-            entry_date = entry.date.date()
-            if entry_date in dates_seen:
-                logger.warning(f"Duplicate entry found for date: {entry_date}")
-                continue
-            
-            dates_seen.add(entry_date)
-            unique_entries.append(entry)
-        
-        return unique_entries 
+    def _create_entry(self, date: datetime, content: str) -> JournalEntrySchema:
+        """
+        Create a JournalEntrySchema instance from parsed data.
+        """
+        return JournalEntrySchema(
+            date=date,
+            content=content,
+            word_count=len(content.split()),
+            year=date.year,
+            month=date.month,
+            day=date.day,
+            metadata={
+                "source": "pdf_import",
+                "processed_at": datetime.utcnow().isoformat()
+            }
+        ) 
