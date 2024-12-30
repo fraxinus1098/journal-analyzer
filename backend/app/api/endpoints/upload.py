@@ -1,18 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
-from typing import List, Dict, Any
-import os
-import shutil
+from typing import List
 from pathlib import Path
-import re
 import logging
 from ...services.pdf_service import PDFService
-from ...core.config import settings
-from ...utils.security import validate_file_type
-import requests
-from sqlalchemy.orm import Session
 from ...db.init_db import get_db
 from ...models.journal import JournalEntry
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 pdf_service = PDFService()
@@ -20,123 +14,80 @@ logger = logging.getLogger(__name__)
 
 UPLOAD_DIR = Path("temp_uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
-
-def sanitize_filename(filename: str) -> str:
-    """Sanitize filename to prevent path traversal"""
-    # Remove any directory components
-    filename = Path(filename).name
-    # Remove any non-alphanumeric chars except for periods and underscores
-    filename = re.sub(r'[^\w\-_\.]', '_', filename)
-    return filename
 
 @router.post("/upload/")
-def upload_files(
+async def upload_files(
     background_tasks: BackgroundTasks,
-    files: List[UploadFile] = File(...)
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db)
 ) -> JSONResponse:
-    """
-    Upload and process PDF journal files
-    """
+    """Upload and process PDF journal files"""
     results = []
-    temp_files = []  # Track temp files for cleanup
     
     for file in files:
-        temp_file = None
         try:
-            # Validate file type using the imported utility
-            if not validate_file_type(file, allowed_types=["application/pdf"]):
-                raise HTTPException(status_code=400, detail="Only PDF files are allowed")
-            
-            # Validate file size
-            file_size = 0
-            chunk_size = 8192  # 8KB chunks
-            
-            # Create temporary file path with sanitized name
-            safe_filename = sanitize_filename(file.filename)
-            temp_file = UPLOAD_DIR / f"temp_{safe_filename}"
-            temp_files.append(temp_file)
-            
-            # Save and validate file size
+            # Validate and save file
+            temp_file = UPLOAD_DIR / f"temp_{file.filename}"
             with temp_file.open("wb") as buffer:
-                while content := file.file.read(chunk_size):  # Changed from await
-                    file_size += len(content)
-                    if file_size > MAX_FILE_SIZE:
-                        raise HTTPException(
-                            status_code=400, 
-                            detail=f"File size exceeds {MAX_FILE_SIZE // 1024 // 1024}MB limit"
-                        )
-                    buffer.write(content)
+                content = await file.read()
+                buffer.write(content)
             
-            # Add to background processing queue
-            background_tasks.add_task(
-                pdf_service.process_pdf,
-                temp_file,
-                safe_filename
-            )
+            # Process PDF and get task_id
+            task_id = pdf_service.process_pdf(temp_file, file.filename)
+            
+            # Get processed content
+            status = pdf_service.get_task_status(task_id)
+            if status["status"] == "completed":
+                # Create journal entry with only valid fields
+                journal_entry = JournalEntry(
+                    content=status["result"],
+                    filename=file.filename
+                )
+                db.add(journal_entry)
+                db.commit()
             
             results.append({
-                "filename": safe_filename,
-                "status": "processing",
-                "message": "File uploaded and queued for processing"
+                "filename": file.filename,
+                "task_id": task_id,
+                "status": status["status"]
             })
             
-        except HTTPException as e:
-            raise e
         except Exception as e:
-            logger.error(f"Error processing file {getattr(file, 'filename', 'unknown')}: {str(e)}")
-            if temp_file and temp_file.exists():
-                temp_file.unlink()
-                
+            logger.error(f"Error processing file {file.filename}: {str(e)}")
             results.append({
-                "filename": getattr(file, 'filename', 'unknown'),
+                "filename": file.filename,
                 "status": "error",
                 "message": str(e)
             })
             
-        finally:
-            file.file.close()  # Changed from await
-    
-    # Add cleanup task for successful uploads
-    background_tasks.add_task(cleanup_temp_files, temp_files)
-            
     return JSONResponse(content={"results": results})
 
-def cleanup_temp_files(temp_files: List[Path]) -> None:
-    """Clean up temporary files after processing"""
-    for temp_file in temp_files:
-        try:
-            if temp_file.exists():
-                temp_file.unlink()
-        except OSError as e:
-            logger.error(f"Error cleaning up {temp_file}: {e}")
-
 @router.get("/upload/status/{task_id}")
-def get_upload_status(task_id: str) -> JSONResponse:
+async def get_upload_status(task_id: str) -> JSONResponse:
     """Get the status of a file upload/processing task"""
     status = pdf_service.get_task_status(task_id)
+    if status["status"] == "not_found":
+        raise HTTPException(status_code=404, detail="Task not found")
     return JSONResponse(content=status)
 
-def upload_pdfs(pdf_files):
-    url = "http://localhost:8000/api/upload/"
-    files = []
+@router.get("/entries/")
+def get_entries(db: Session = Depends(get_db)):
+    """Get all journal entries"""
     try:
-        for f in pdf_files:
-            path = Path(f)
-            with open(path, 'rb') as file:
-                files.append(('files', (path.name, file, 'application/pdf')))
-        response = requests.post(url, files=files)
-        return response.json()
-    finally:
-        # Ensure all files are closed
-        for _, (_, file, _) in files:
-            if hasattr(file, 'close'):
-                file.close()
-
-@router.post("/upload")
-def upload_journal(file: UploadFile, db: Session = Depends(get_db)):
-    """Upload a journal entry"""
-    journal_entry = JournalEntry(content="some content")
-    db.add(journal_entry)
-    db.commit()
-    return {"status": "success"} 
+        entries = db.query(JournalEntry).all()
+        return {
+            "total": len(entries),
+            "entries": [
+                {
+                    "id": entry.id,
+                    "content": entry.content[:100] + "...",  # Preview only
+                    "created_at": entry.created_at
+                }
+                for entry in entries
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch entries: {str(e)}"
+        ) 

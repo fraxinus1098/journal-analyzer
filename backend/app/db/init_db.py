@@ -16,9 +16,13 @@ SessionLocal = sessionmaker(bind=engine)
 def init_db():
     """Initialize database with required tables."""
     with engine.begin() as conn:
+        # Drop existing tables
+        Base.metadata.drop_all(bind=engine)
+        
         # Create pgvector extension
         conn.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
-        # Create tables
+        
+        # Create tables with new schema
         Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -27,3 +31,18 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Add this function to test database connection
+def test_db_connection():
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT 1"))
+            print("Database connection successful!")
+            return True
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+        return False
+
+# Add this to your startup
+if __name__ == "__main__":
+    test_db_connection()

@@ -28,7 +28,7 @@ An AI-powered web application that analyzes personal journal entries to provide 
 - FastAPI
 - LangChain
 - OpenAI API
-- PostgreSQL with pgvector
+- PostgreSQL with pgvector and SQLAlchemy Psycopg2
 
 ## Setup
 

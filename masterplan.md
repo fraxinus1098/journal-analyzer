@@ -49,7 +49,7 @@ A web application deployed on Replit that analyzes personal journal entries to p
 
 ## Data Flow
 1. **Input Processing**
-   - PDF text extraction using PyPDF2
+   - PDF text extraction(PDFPlumber)
    - Date parsing and entry segmentation
    - Text cleaning and normalization
 
@@ -201,7 +201,7 @@ Backend:
 - Matplotlib
 - OpenAI API (gpt-4o-mini-2024-07-18, text-embedding-3-small at 1536 dimensions)
 - PostgreSQL with pgvector using Replit's PostgreSQL database
-- SQLAlchemy
+- SQLAlchemy with Psycopg2
 ```
 
 ## Security Considerations

@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -18,8 +19,9 @@ class JournalEntry(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=False)
+    filename = Column(String(255), nullable=True)
     embedding = Column(Vector(1536), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class JournalEntrySchema(BaseModel):
