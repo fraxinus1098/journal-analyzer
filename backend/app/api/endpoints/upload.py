@@ -110,35 +110,50 @@ async def process_file(file: UploadFile, status: ProcessingStatus, db: Session):
             # Process PDF
             logger.info("Starting PDF processing")
             extracted_content = await pdf_processor.process_pdf(temp_file.name)
-            logger.info(f"PDF processing complete. Extracted {len(extracted_content)} pages")
+            logger.info(f"PDF processing complete. Content length: {len(extracted_content)}")
+            logger.info(f"Content preview: {extracted_content[:200]}...")  # Debug line
             status.progress = 30
             
             # Parse entries
             logger.info("Starting entry parsing")
-            entries = entry_parser.parse_entries(extracted_content)
+            entries = entry_parser.parse_entries(
+                content=extracted_content,
+                source_file=file.filename
+            )
             logger.info(f"Entry parsing complete. Found {len(entries)} entries")
+            if entries:
+                sample_entry = entries[0]
+                logger.info(f"Sample entry: {sample_entry}")
             status.progress = 50
             
             # Clean entries
             logger.info("Starting data cleaning")
             cleaned_entries = [
-                JournalEntrySchema(
-                    **{**entry.dict(),
-                       "content": data_cleaner.clean_text(entry.content)}
-                )
+                {
+                    **entry,
+                    "content": data_cleaner.clean_text(entry["content"])
+                }
                 for entry in entries
             ]
             logger.info(f"Data cleaning complete. Cleaned {len(cleaned_entries)} entries")
+            if cleaned_entries:
+                logger.info(f"Sample cleaned entry: {cleaned_entries[0]}")
             status.progress = 70
             
             # Validate entries
             logger.info("Starting entry validation")
             valid_entries = data_validator.validate_entries(cleaned_entries)
             logger.info(f"Validation complete. {len(valid_entries)} valid entries")
+            if valid_entries:
+                logger.info(f"Sample valid entry: {valid_entries[0]}")
             status.progress = 80
             
             # Store entries
             logger.info("Starting database storage")
+            if not valid_entries:
+                logger.error("No valid entries to store!")
+                raise ValueError("No valid entries found after validation")
+                
             success_count, errors = await db_operations.store_entries(valid_entries)
             logger.info(f"Storage complete. Stored {success_count} entries with {len(errors)} errors")
             

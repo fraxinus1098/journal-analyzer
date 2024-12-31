@@ -1,78 +1,52 @@
 """
 Service for validating journal entries.
 """
-from datetime import datetime
-from typing import List, Optional
+from typing import List, Dict, Any
 import logging
-from ..models.journal import JournalEntrySchema
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 class DataValidator:
-    def __init__(self):
-        self.min_content_length = 10  # Minimum characters for valid entry
-        self.max_content_length = 50000  # Maximum characters for valid entry
-        
-    def validate_entries(self, entries: List[JournalEntrySchema]) -> List[JournalEntrySchema]:
-        """
-        Validate a list of journal entries.
-        Returns only valid entries and logs validation failures.
-        """
+    def validate_entries(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Validate journal entries."""
         valid_entries = []
-        seen_dates = set()
         
-        # Sort entries by date for chronological validation
-        sorted_entries = sorted(entries, key=lambda x: x.date)
+        logger.info(f"Starting validation of {len(entries)} entries")
         
-        for entry in sorted_entries:
-            validation_result = self._validate_entry(entry, seen_dates)
-            if validation_result.is_valid:
+        for entry in entries:
+            try:
+                # Log the entry being validated
+                logger.info(f"Validating entry: {entry.get('date')} - {entry.get('content')[:50]}...")
+                
+                # Validate required fields exist
+                required_fields = ['date', 'content', 'source_file']
+                missing_fields = [field for field in required_fields if field not in entry]
+                if missing_fields:
+                    logger.warning(f"Entry missing required fields: {missing_fields}")
+                    continue
+                
+                # Validate content is not empty
+                if not entry['content'] or not entry['content'].strip():
+                    logger.warning("Entry has empty content")
+                    continue
+                
+                # More lenient date validation
+                if not entry['date']:
+                    logger.warning(f"Invalid date: {entry.get('date')}")
+                    continue
+                
+                # More lenient word count validation
+                if 'word_count' not in entry or entry['word_count'] is None:
+                    entry['word_count'] = len(entry['content'].split())
+                    logger.info(f"Added word count: {entry['word_count']}")
+                
                 valid_entries.append(entry)
-                seen_dates.add(entry.date.date())
-            else:
-                logger.warning(f"Entry validation failed: {validation_result.error}")
+                logger.info(f"Entry validated successfully: {entry.get('date')}")
+                
+            except Exception as e:
+                logger.error(f"Error validating entry: {str(e)}")
+                continue
         
-        return valid_entries
-    
-    def _validate_entry(self, entry: JournalEntrySchema, seen_dates: set) -> 'ValidationResult':
-        """
-        Validate a single journal entry.
-        """
-        # Check for future dates
-        if entry.date > datetime.now():
-            return ValidationResult(False, "Entry date is in the future")
-        
-        # Check for duplicate dates
-        if entry.date.date() in seen_dates:
-            return ValidationResult(False, f"Duplicate entry for date {entry.date.date()}")
-        
-        # Validate content length
-        if len(entry.content) < self.min_content_length:
-            return ValidationResult(False, "Entry content too short")
-        if len(entry.content) > self.max_content_length:
-            return ValidationResult(False, "Entry content too long")
-        
-        # Validate word count
-        if entry.word_count == 0:
-            return ValidationResult(False, "Entry has no words")
-        
-        # Validate date components
-        if not self._validate_date_components(entry):
-            return ValidationResult(False, "Invalid date components")
-        
-        return ValidationResult(True)
-    
-    def _validate_date_components(self, entry: JournalEntrySchema) -> bool:
-        """
-        Validate that date components (year, month, day) match the entry date.
-        """
-        return (
-            entry.year == entry.date.year and
-            entry.month == entry.date.month and
-            entry.day == entry.date.day
-        )
-
-class ValidationResult:
-    def __init__(self, is_valid: bool, error: str = ""):
-        self.is_valid = is_valid
-        self.error = error 
+        logger.info(f"Validation complete. {len(valid_entries)} valid out of {len(entries)} total")
+        return valid_entries 

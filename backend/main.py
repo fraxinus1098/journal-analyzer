@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
-from app.db.init_db import init_db, verify_database
+from app.db.init_db import init_db, verify_database, reset_database
 
 app = FastAPI(
     title="Mental Health Journal Analysis API",
@@ -22,6 +22,9 @@ app.add_middleware(
 # TODO: Initialize database
 @app.on_event("startup")
 async def startup_event():
+    print("Starting database reset...")
+    reset_database()  # This line should be uncommented for the first run
+    print("Database reset complete")
     verify_database()
 
 # TODO: Include API routers

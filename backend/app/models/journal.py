@@ -3,7 +3,7 @@
 SQLAlchemy models for journal entries and analysis results.
 """
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Text, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Date, Float, JSON, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
@@ -18,11 +18,32 @@ class JournalEntry(Base):
     __tablename__ = "journal_entries"
 
     id = Column(Integer, primary_key=True, index=True)
+    
+    # Core Entry Data
+    entry_date = Column(DateTime, nullable=False, index=True)
     content = Column(Text, nullable=False)
-    filename = Column(String(255), nullable=True)
+    word_count = Column(Integer, nullable=False, default=0)
+    year = Column(Integer, nullable=False, index=True)
+    month = Column(Integer, nullable=False, index=True)
+    day = Column(Integer, nullable=False)
+    
+    # Analysis Data (nullable for now)
+    sentiment_score = Column(Float, nullable=True)
+    complexity_score = Column(Float, nullable=True)
+    topics = Column(JSON, nullable=True)
+    mentioned_people = Column(JSON, nullable=True)
+    mentioned_locations = Column(JSON, nullable=True)
+    
+    # Vector Embedding (1536 dimensions for OpenAI embeddings)
     embedding = Column(Vector(1536), nullable=True)
+    
+    # Metadata
+    source_file = Column(String, nullable=False)
+    entry_number = Column(Integer, nullable=False)
+    
+    # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 class JournalEntrySchema(BaseModel):
     """Pydantic model for API interactions"""
