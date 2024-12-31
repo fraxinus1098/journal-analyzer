@@ -23,12 +23,12 @@ class DatabaseOperations:
                 db_entry = JournalEntry(
                     entry_date=entry_data['date'],
                     content=entry_data['content'],
+                    day_of_week=entry_data['day_of_week'],
                     word_count=entry_data['word_count'],
                     year=entry_data['year'],
                     month=entry_data['month'],
                     day=entry_data['day'],
                     source_file=entry_data['source_file'],
-                    entry_number=entry_data['entry_number'],
                     sentiment_score=entry_data.get('sentiment_score'),
                     complexity_score=entry_data.get('complexity_score'),
                     topics=entry_data.get('topics'),

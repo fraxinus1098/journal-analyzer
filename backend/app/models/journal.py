@@ -18,9 +18,8 @@ class JournalEntry(Base):
     __tablename__ = "journal_entries"
 
     id = Column(Integer, primary_key=True, index=True)
-    
-    # Core Entry Data
-    entry_date = Column(DateTime, nullable=False, index=True)
+    entry_date = Column(Date, nullable=False)
+    day_of_week = Column(Integer, nullable=False)  # 1=Sunday through 7=Saturday
     content = Column(Text, nullable=False)
     word_count = Column(Integer, nullable=False, default=0)
     year = Column(Integer, nullable=False, index=True)
@@ -35,11 +34,10 @@ class JournalEntry(Base):
     mentioned_locations = Column(JSON, nullable=True)
     
     # Vector Embedding (1536 dimensions for OpenAI embeddings)
-    embedding = Column(Vector(1536), nullable=True)
+    embedding = Column(Vector(1536))
     
     # Metadata
     source_file = Column(String, nullable=False)
-    entry_number = Column(Integer, nullable=False)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
