@@ -43,27 +43,72 @@ A web application deployed on Replit that analyzes personal journal entries to p
    - Text cleaning and normalization
 
 2. **Statistical Analysis**
-   - Word count analytics
-   - Writing pattern computation
-   - Entry length statistics
-   - Writing streak tracking
-   - Time coverage analysis
-   - Pre-compute all time-series data
-   - Generate all visualization datasets
+   - Basic Metrics
+     - Word count analytics (Pandas + NumPy)
+     - Entry length statistics (Pandas)
+     - Writing streak tracking (Pandas DateTimeIndex)
+     - Time coverage analysis (Pandas date_range)
+     - Pre-compute all time-series data (Pandas + NumPy)
+     - Generate all visualization datasets (Pandas → JSON)
+
+   - Time-Based Analytics
+     - Day of week distribution (Pandas groupby + resample)
+     - Monthly/seasonal trends (Pandas seasonal_decompose + statsmodels)
+     - Entry frequency analysis (Pandas resample + rolling)
+     - Gap identification and analysis (Pandas date_range + mask)
+     - Writing consistency scoring (Pandas rolling + NumPy)
+     - Rolling averages computation (Pandas rolling)
+
+   - Text Structure Analysis
+     - Basic Structure (SpaCy + regex):
+       - Sentence length distribution
+       - Punctuation usage statistics
+       - Question/exclamation patterns
+     - Advanced Structure (OpenAI API):
+       - Writing style patterns
+       - Structural evolution analysis
+       - Complex pattern recognition
+
+   - Vocabulary Analysis
+     - Basic Analysis (SpaCy + textstat):
+       - Word counting
+       - Basic POS tagging
+       - Simple readability metrics
+     - Advanced Analysis (OpenAI API):
+       - Vocabulary sophistication
+       - Context-aware word usage
+       - Writing style maturity
+
+   - Entry Characteristics
+     - Basic Extraction (regex + Pandas):
+       - Date/time references
+       - Number usage
+     - Advanced Extraction (OpenAI API):
+       - Meta-information understanding
+       - Contextual references
+       - Implicit information
+
+   - Comparative Analytics
+     - Week-over-week changes (Pandas shift + pct_change)
+     - Month-over-month growth (Pandas resample + pct_change)
+     - Year-over-year evolution (Pandas groupby + rolling)
+     - Statistical outlier detection (scipy.stats + NumPy)
+     - Pattern correlation analysis (Pandas corr + scipy.stats)
+     - Cross-metric relationship analysis (scipy.stats + seaborn)
 
 3. **Emotional Analysis**
-   - Sentiment timeline generation
-   - Mood pattern detection
-   - Emotional word frequency analysis
-   - Pre-compute emotional trends
-   - Generate emotional visualizations
+   - Sentiment timeline generation (OpenAI API + Pandas)
+   - Mood pattern detection (OpenAI API + scipy.signal)
+   - Emotional word frequency analysis (SpaCy + VADER)
+   - Pre-compute emotional trends (Pandas rolling + NumPy)
+   - Generate emotional visualizations (Matplotlib + seaborn)
 
 4. **Results Storage**
-   - Store all computed statistics
-   - Save complete time-series data
-   - Cache all visualization-ready datasets
-   - Maintain aggregated metrics
-   - Store emotional analysis results
+   - Store all computed statistics (PostgreSQL + SQLAlchemy)
+   - Save complete time-series data (PostgreSQL + JSON)
+   - Cache all visualization-ready datasets (Redis/PostgreSQL)
+   - Maintain aggregated metrics (PostgreSQL)
+   - Store emotional analysis results (PostgreSQL + pgvector)
 
 ### Phase 2: Search & AI Features
 1. **Search Infrastructure**
