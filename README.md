@@ -116,3 +116,24 @@ cd ../backend && poetry install
 # Start services
 cd ../frontend && yarn dev &
 cd ../backend && poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Journal Analysis Dashboard
+
+## PDF Processing Pipeline
+
+This application includes a robust PDF processing pipeline for converting journal entries into structured data. The pipeline includes:
+
+1. **PDF Text Extraction**: Converts PDF files to text while preserving structure
+2. **Entry Parsing**: Identifies and segments individual journal entries
+3. **Data Cleaning**: Removes artifacts and normalizes text
+4. **Validation**: Ensures data quality and completeness
+5. **Database Storage**: Securely stores processed entries
+
+For detailed documentation:
+- [Technical Pipeline Documentation](docs/technical/processing-pipeline.md)
+- [API Documentation](docs/api/endpoints.md)
+- [Database Schema](docs/technical/schema.md)
+
+## Getting Started
+
+[Rest of README content...]

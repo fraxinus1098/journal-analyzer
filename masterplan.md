@@ -12,66 +12,72 @@ A web application deployed on Replit that analyzes personal journal entries to p
 ## Technical Architecture Decisions
 
 ### Frontend: NextJS
-- **Decision**: Implement as a NextJS web application
-- **Rationale**: Provides excellent developer experience, server-side rendering capabilities, and robust routing
+- **Decision**: Implement as a NextJS web application with interactive visualizations
+- **Rationale**: 
+  - Provides excellent developer experience
+  - Enables rich client-side interactivity with pre-computed data
+  - Supports efficient data visualization rendering
 
 ### Backend: Python + FastAPI
 - **Decision**: Python backend with FastAPI deployed on Replit
-- **Rationale**: FastAPI offers high performance and automatic API documentation
-
-### Data Storage & Retrieval: Hybrid Search System
-- **Decision**: Implement hybrid search combining BM25 and vector search
-- **Components**:
-  - PostgreSQL with pgvector for vector storage
-  - BM25 for keyword-based retrieval
-  - LangChain for orchestrating the retrieval system
 - **Rationale**: 
-  - BM25 provides excellent keyword matching
-  - Vector search captures semantic meaning
-  - Hybrid approach improves accuracy of journal analysis
-  - LangChain simplifies integration of multiple search approaches
+  - Excellent for one-time batch processing
+  - Efficient statistical computations
+  - Handles PDF processing and AI integration well
 
-### RAG Implementation with Hybrid Search
-- **Storage**: 
-  - PostgreSQL with pgvector for embeddings
-  - BM25 index for keyword search
-- **Retrieval**: 
-  - EnsembleRetriever combining BM25 and vector search
-  - Weighted combination (40% BM25, 60% vector search)
-- **Generation**: 
-  - GPT-4 for context-aware insight generation
-  - Enhanced context selection using hybrid search
-- **Use Cases**:
-  - More accurate theme identification
-  - Better pattern recognition
-  - Improved contextual summaries
-  - Enhanced emotional analysis
+### Data Processing & Storage
+- **Decision**: Two-phase processing approach
+  1. Initial Analysis Phase (comprehensive one-time processing)
+  2. Search Infrastructure Phase (for AI-powered features)
+- **Rationale**: 
+  - Pre-computes all statistics for optimal frontend performance
+  - Enables smooth, instant frontend interactions
+  - Maintains advanced search capabilities for AI features
 
-## Data Flow
+## Processing Phases
+
+### Phase 1: Comprehensive Analysis (One-Time Processing)
 1. **Input Processing**
    - PDF text extraction (PDFPlumber)
    - Date parsing and entry segmentation
    - Text cleaning and normalization
 
-2. **Search Index Creation**
-   - BM25 index creation using LangChain's BM25Retriever
-   - Vector embedding generation using OpenAI API
-   - Storage in PostgreSQL with pgvector
+2. **Statistical Analysis**
+   - Word count analytics
+   - Writing pattern computation
+   - Entry length statistics
+   - Writing streak tracking
+   - Time coverage analysis
+   - Pre-compute all time-series data
+   - Generate all visualization datasets
 
-3. **Analysis Pipeline**
-   - Hybrid search setup:
-     - BM25Retriever for keyword matching
-     - Vector retrieval for semantic search
-     - EnsembleRetriever for combining results
-   - Emotional analysis using OpenAI API
-   - Topic extraction using hybrid search results
-   - Statistical analysis computation
+3. **Emotional Analysis**
+   - Sentiment timeline generation
+   - Mood pattern detection
+   - Emotional word frequency analysis
+   - Pre-compute emotional trends
+   - Generate emotional visualizations
 
-4. **Storage Layer**
-   - Journal entries in PostgreSQL (JSON format)
-   - Vector embeddings in PostgreSQL (pgvector)
-   - BM25 index maintained by LangChain
-   - Pre-computed analysis results in PostgreSQL
+4. **Results Storage**
+   - Store all computed statistics
+   - Save complete time-series data
+   - Cache all visualization-ready datasets
+   - Maintain aggregated metrics
+   - Store emotional analysis results
+
+### Phase 2: Search & AI Features
+1. **Search Infrastructure**
+   - BM25 index setup
+   - Vector embedding generation
+   - Hybrid search configuration
+   - RAG system implementation
+
+2. **Advanced Analysis Features**
+   - Topic discovery and evolution
+   - Theme extraction
+   - Personal growth tracking
+   - Memory exploration
+   - RAG-powered insights
 
 ## Implementation Phases
 
@@ -165,44 +171,65 @@ A web application deployed on Replit that analyzes personal journal entries to p
 
 ## Technical Components
 
-### ML/AI Components
-- LangChain for:
-  - BM25 retrieval
-  - Hybrid search implementation
-  - RAG orchestration
-- OpenAI API for:
-  - Text embeddings
-  - RAG implementation
-  - Sentiment analysis
-  - Topic modeling
-  - NER
-- NumPy/Pandas for statistical analysis
-- Matplotlib for visualization generation
-- T-SNE for dimensionality reduction
+### Frontend Visualization
+- D3.js for interactive charts using pre-computed data
+  - Timeline visualizations
+  - Network graphs
+  - Interactive controls
+- Chart.js for statistical displays
+  - Time series data
+  - Distribution plots
+  - Trend analysis
+- Three.js for 3D visualizations
+  - Topic galaxies
+  - Word universes
+  - Memory spaces
+- Client-side filtering and data manipulation
+- Real-time graph updates without backend recalculation
+- Interactive controls for visualization parameters
+- Efficient state management for large datasets
 
-### Data Visualization
-- Matplotlib for static visualizations
-- D3.js for interactive visualizations
-- Chart.js for statistical charts
-- Three.js for 3D topic visualizations
+### Backend Processing
+- One-time comprehensive statistical analysis
+  - NumPy/Pandas for statistical computations
+  - Matplotlib/Seaborn for static visualization generation
+  - T-SNE for dimensionality reduction
+  - scikit-learn for clustering and pattern detection
+- Complete emotional analysis computation
+  - OpenAI API integration
+  - Sentiment analysis pipelines
+  - Emotional pattern detection
+- Search index management
+  - BM25 indexing
+  - Vector embeddings
+  - Hybrid search optimization
+- RAG system integration
+  - LangChain implementation
+  - Context management
+  - Response generation
+- Efficient data storage and retrieval
+- Batch processing optimizations
+- Statistical computation pipelines
 
-### Core Libraries
-```text
-Frontend:
-- NextJS/React
-- D3.js/Chart.js/Three.js
-- TailwindCSS
-
-Backend:
-- Python 3.9+
-- FastAPI
-- LangChain
-- Pandas/NumPy
-- Matplotlib
-- OpenAI API (gpt-4o-mini-2024-07-18, text-embedding-3-small at 1536 dimensions)
-- PostgreSQL with pgvector using Replit's PostgreSQL database
-- SQLAlchemy with Psycopg2
-```
+### Data Storage
+- Processed statistics in PostgreSQL
+  - Time series data
+  - Aggregated metrics
+  - Analysis results
+- Pre-computed visualization data
+  - Chart datasets
+  - Graph structures
+  - Time-based aggregations
+- Search indices and embeddings
+  - BM25 indices
+  - Vector embeddings
+  - Hybrid search structures
+- Cached analysis results
+  - Statistical computations
+  - Emotional analyses
+  - Topic clustering
+- Optimized query structures
+- Efficient data retrieval patterns
 
 ## Security Considerations
 - Secure API key management in Replit
@@ -222,9 +249,9 @@ Backend:
 8. Testing and optimization
 
 ## Next Steps
-1. Set up Replit environment
-2. Create basic NextJS template
-3. Configure PostgreSQL and pgvector
-4. Setup LangChain and BM25
-5. Implement hybrid search system
-6. Begin Phase 1 feature development
+1. Implement comprehensive analysis pipeline
+2. Set up complete statistical computation system
+3. Create all visualization data structures
+4. Develop interactive frontend components
+5. Configure search infrastructure
+6. Build advanced AI-powered features
